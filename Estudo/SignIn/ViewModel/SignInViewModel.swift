@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 enum TextFieldType: String {
     case user
@@ -13,15 +14,16 @@ enum TextFieldType: String {
 }
 
 protocol SignInViewModelProtocol {
-    var showAlert: ((String, String) -> Void)? { get set }
-    
+    var showAlert: ((String, String, ((UIAlertAction) -> Void)?) -> Void)? { get set }
+    var navigateToPokemons: (() -> Void)? { get set }
     func change(text: String, type: TextFieldType)
     func login()
     
 }
 
 class SignInViewModel: SignInViewModelProtocol {
-    var showAlert: ((String, String) -> Void)?
+    var showAlert: ((String, String, ((UIAlertAction) -> Void)?) -> Void)?
+    var navigateToPokemons: (() -> Void)?
     
     private var user: String?
     private var password: String?
@@ -65,16 +67,19 @@ class SignInViewModel: SignInViewModelProtocol {
             let result = DataBseController.fetchLog(logar: Cadastro.self, parametro: parametro)
             
             if result.isEmpty {
-                showAlert?("Verifique novamente seu e-mail ou sua senha", "Ok")
+                showAlert?("Verifique novamente seu e-mail ou sua senha", "Ok", nil)
             } else {
                 if result.first != nil {
-                    showAlert?("Sucesso ao logar", "Ok")
+                    let action: ((UIAlertAction) -> Void)? = { [weak self] _ in
+                        self?.navigateToPokemons?()
+                    }
+                    showAlert?("Sucesso ao logar", "Ok", action)
                 }
             }
             
         }
         else{
-            showAlert?("Caracteres insuficientes", "Ok")
+            showAlert?("Caracteres insuficientes", "Ok", nil)
         }
     }
 }
